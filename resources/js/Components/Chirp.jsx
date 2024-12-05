@@ -21,7 +21,6 @@ export default function Chirp({ chirp }) {
         e.preventDefault();
         patch(route('chirps.update', chirp.id), { onSuccess: () => setEditing(false) });
     };
- 
     return (
         <div className="p-6 flex space-x-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -48,7 +47,7 @@ export default function Chirp({ chirp }) {
                                     Edit
                                 </button>
                                 <Dropdown.Link as="button" href={route('chirps.destroy', chirp.id)} method="delete">
-                                        Delete
+                                    Delete
                                 </Dropdown.Link>
                             </Dropdown.Content>
                         </Dropdown>
@@ -63,7 +62,14 @@ export default function Chirp({ chirp }) {
                             <button className="mt-4" onClick={() => { setEditing(false); reset(); clearErrors(); }}>Cancel</button>
                         </div>
                     </form>
-                    : <p className="mt-4 text-lg text-gray-900">{chirp.message}</p>
+                    : (
+                        <>
+                            <p className="mt-4 text-lg text-gray-900">{chirp.message}</p>
+                            {
+                            chirp.image && <img src={route("chirps.image", chirp.image)} />
+                            }
+                        </>
+                    )
                 }
             </div>
         </div>

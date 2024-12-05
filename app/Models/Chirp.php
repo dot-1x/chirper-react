@@ -10,6 +10,7 @@ class Chirp extends Model
 {
     protected $fillable = [
         'message',
+        'image'
     ];
     protected $dispatchesEvents = [
         'created' => ChirpCreated::class,

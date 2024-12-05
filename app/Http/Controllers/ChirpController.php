@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class ChirpController extends Controller
 {
@@ -34,10 +36,15 @@ class ChirpController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-
+        if ($request->hasFile("image")) {
+            if (!Storage::exists($request->user()->id))
+                Storage::createDirectory($request->user()->id);
+            $path = Storage::putFile($request->user()->id, $request->file("image"));
+            $validated["image"] = basename($path);
+        }
         $request->user()->chirps()->create($validated);
-
         return redirect(route('chirps.index'));
     }
 
@@ -76,12 +83,25 @@ class ChirpController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Chirp $chirp): RedirectResponse
+    public function destroy(Request $request, Chirp $chirp): RedirectResponse
     {
         Gate::authorize('delete', $chirp);
-
+        if ($chirp->image) {
+            $userid = $request->user()->id;
+            Storage::delete(storage_path("app/private/{$userid}/asw.png"));
+        }
         $chirp->delete();
 
         return redirect(route('chirps.index'));
+    }
+
+    public function image(Request $request, String $filename)
+    {
+        $userid = $request->user()->id;
+        try {
+            return response()->file(storage_path("app/private/{$userid}/{$filename}"));
+        } catch (FileNotFoundException) {
+            abort(404);
+        }
     }
 }

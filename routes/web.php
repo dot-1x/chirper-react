@@ -4,6 +4,7 @@ use App\Http\Controllers\ChirpController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -29,4 +30,7 @@ Route::resource('chirps', ChirpController::class)
     ->only(['index', 'store', 'update', "destroy"])
     ->middleware(['auth', 'verified']);
 
+Route::get('/chirp-image/{filename}', [ChirpController::class, 'image'])
+    ->middleware(['auth', 'verified'])
+    ->name('chirps.image');
 require __DIR__ . '/auth.php';
